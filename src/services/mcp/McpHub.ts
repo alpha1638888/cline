@@ -72,7 +72,11 @@ export class McpHub {
 	getMode(): McpMode {
 		return vscode.workspace.getConfiguration("cline.mcp").get<McpMode>("mode", "full")
 	}
-
+	
+	get autoRestartOnChanges(): boolean {
+		return vscode.workspace.getConfiguration("cline.mcp").get<boolean>("autoRestartOnChanges", true);
+	}
+	
 	async getMcpServersPath(): Promise<string> {
 		const provider = this.providerRef.deref()
 		if (!provider) {
@@ -386,6 +390,9 @@ export class McpHub {
 			})
 
 			watcher.on("change", () => {
+				if (!this.autoRestartOnChanges) {
+					return;
+				}
 				console.log(`Detected change in ${filePath}. Restarting server ${name}...`)
 				this.restartConnection(name)
 			})
